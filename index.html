@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopify Insights Fetcher - Test Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .form-section {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 1.1rem;
+        }
+        
+        input[type="url"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+        
+        input[type="url"]:focus {
+            outline: none;
+            border-color: #4f46e5;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .results {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8fafc;
+            border-radius: 15px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .results h3 {
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .success-icon {
+            color: #10b981;
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .result-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .result-item h4 {
+            color: #4f46e5;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .result-item p {
+            color: #6b7280;
+            line-height: 1.5;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            transition: transform 0.2s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .product-card h5 {
+            color: #1e293b;
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+        
+        .product-card .price {
+            color: #10b981;
+            font-weight: 600;
+        }
+        
+        .error {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 10px;
+            color: #dc2626;
+        }
+        
+        .examples {
+            margin-top: 20px;
+            padding: 20px;
+            background: #eff6ff;
+            border-radius: 10px;
+            border: 1px solid #dbeafe;
+        }
+        
+        .examples h4 {
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+        
+        .examples ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .examples li {
+            padding: 5px 0;
+            color: #3730a3;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        
+        .examples li:hover {
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛍️ Shopify Insights Fetcher</h1>
+            <p>Extract comprehensive insights from any Shopify store</p>
+        </div>
+        
+        <div class="form-section">
+            <form id="insightsForm">
+                <div class="form-group">
+                    <label for="websiteUrl">Shopify Store URL</label>
+                    <input type="url" id="websiteUrl" name="websiteUrl" 
+                           placeholder="https://example.myshopify.com" required>
+                </div>
+                
+                <button type="submit" class="btn" id="submitBtn">
+                    🚀 Fetch Store Insights
+                </button>
+            </form>
+            
+            <div class="examples">
+                <h4>📝 Try these example stores:</h4>
+                <ul>
+                    <li onclick="setExample('https://memy.co.in')">memy.co.in</li>
+                    <li onclick="setExample('https://hairoriginals.com')">hairoriginals.com</li>
+                    <li onclick="setExample('https://colourpop.com')">colourpop.com</li>
+                </ul>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing store... This may take 30-60 seconds</p>
+            </div>
+            
+            <div class="error" id="error">
+                <p id="errorMessage"></p>
+            </div>
+            
+            <div class="results" id="results">
+                <h3><span class="success-icon">✅</span>Store Analysis Complete!</h3>
+                <div id="resultsContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        
+        document.getElementById('insightsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const websiteUrl = document.getElementById('websiteUrl').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const error = document.getElementById('error');
+            
+            // Reset states
+            loading.style.display = 'block';
+            results.style.display = 'none';
+            error.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Analyzing...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/fetch-insights`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        website_url: websiteUrl
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                displayResults(data);
+                
+            } catch (err) {
+                console.error('Error:', err);
+                document.getElementById('errorMessage').textContent = 
+                    `Error: ${err.message}. Make sure the API server is running on localhost:8000`;
+                error.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 Fetch Store Insights';
+            }
+        });
+        
+        function setExample(url) {
+            document.getElementById('websiteUrl').value = url;
+        }
+        
+        function displayResults(data) {
+            const resultsContent = document.getElementById('resultsContent');
+            
+            let html = `
+                <div class="result-item">
+                    <h4>🏪 Brand Information</h4>
+                    <p><strong>Name:</strong> ${data.brand_name || 'N/A'}</p>
+                    <p><strong>Website:</strong> ${data.website_url}</p>
+                    ${data.brand_context ? `<p><strong>About:</strong> ${data.brand_context.substring(0, 200)}...</p>` : ''}
+                </div>
+                
+                <div class="result-item">
+                    <h4>📦 Product Catalog</h4>
+                    <p><strong>Total Products:</strong> ${data.product_catalog.length}</p>
+                    ${data.product_catalog.length > 0 ? `
+                        <div class="product-grid">
+                            ${data.product_catalog.slice(0, 6).map(product => `
+                                <div class="product-card">
+                                    <h5>${product.title || 'Untitled Product'}</h5>
+                                    <p class="price">$${product.price || '0'}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="result-item">
+                    <h4>⭐ Hero Products</h4>
+                    <p><strong>Featured Products:</strong> ${data.hero_products.length}</p>
+                    ${data.hero_products.length > 0 ? `
+                        <div class="product-grid">
+                            ${data.hero_products.slice(0, 4).map(product => `
+                                <div class="product-card">
+                                    <h5>${product.title || 'Untitled Product'}</h5>
+                                    <p class="price">$${product.price || '0'}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="result-item">
+                    <h4>📞 Contact Information</h4>
+                    ${data.contact_details.emails.length > 0 ? 
+                        `<p><strong>Emails:</strong> ${data.contact_details.emails.join(', ')}</p>` : ''}
+                    ${data.contact_details.phone_numbers.length > 0 ? 
+                        `<p><strong>Phones:</strong> ${data.contact_details.phone_numbers.join(', ')}</p>` : ''}
+                </div>
+                
+                <div class="result-item">
+                    <h4>📱 Social Media</h4>
+                    <p>
+                        ${data.social_handles.instagram ? `<a href="${data.social_handles.instagram}" target="_blank">Instagram</a> ` : ''}
+                        ${data.social_handles.facebook ? `<a href="${data.social_handles.facebook}" target="_blank">Facebook</a> ` : ''}
+                        ${data.social_handles.twitter ? `<a href="${data.social_handles.twitter}" target="_blank">Twitter</a> ` : ''}
+                        ${data.social_handles.tiktok ? `<a href="${data.social_handles.tiktok}" target="_blank">TikTok</a> ` : ''}
+                        ${!data.social_handles.instagram && !data.social_handles.facebook && !data.social_handles.twitter && !data.social_handles.tiktok ? 'No social handles found' : ''}
+                    </p>
+                </div>
+                
+                <div class="result-item">
+                    <h4>❓ FAQs</h4>
+                    <p><strong>Questions Found:</strong> ${data.faqs.length}</p>
+                    ${data.faqs.slice(0, 3).map(faq => `
+                        <div style="margin: 10px 0; padding: 10px; background: #f8fafc; border-radius: 5px;">
+                            <strong>Q:</strong> ${faq.question}<br>
+                            <strong>A:</strong> ${faq.answer.substring(0, 150)}...
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="result-item">
+                    <h4>🔗 Important Links</h4>
+                    <p>
+                        ${data.important_links.contact_us ? `<a href="${data.important_links.contact_us}" target="_blank">Contact Us</a> ` : ''}
+                        ${data.important_links.blogs ? `<a href="${data.important_links.blogs}" target="_blank">Blog</a> ` : ''}
+                        ${data.important_links.order_tracking ? `<a href="${data.important_links.order_tracking}" target="_blank">Order Tracking</a> ` : ''}
+                        ${data.important_links.shipping_info ? `<a href="${data.important_links.shipping_info}" target="_blank">Shipping Info</a> ` : ''}
+                    </p>
+                </div>
+            `;
+            
+            resultsContent.innerHTML = html;
+            document.getElementById('results').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
